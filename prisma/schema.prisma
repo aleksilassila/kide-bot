@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Token {
+  token             String          @id
+  expiresAt         DateTime
+  user              User            @relation(fields: [userId], references: [id])
+  userId            String          @unique
+}
+
+model User {
+  id                String          @id @unique
+  discordId         String          @unique
+  fullName          String
+  email             String
+  password          String
+
+  token             Token?
+  orders            Order[]
+}
+
+model Order {
+  targetPrice       Int
+  user              User            @relation(fields: [userId], references: [id])
+  userId            String
+  product           Product         @relation(fields: [productId], references: [id])
+  productId         String
+
+  @@id([userId, productId])
+}
+
+model Product {
+  id                String          @id
+  name              String
+  variants          Variant[]
+  orders            Order[]
+  salesFrom         DateTime?
+  salesUntil        DateTime?
+}
+
+model Variant {
+  id                String          @id
+  inventoryId       String
+  name              String
+  price             Int
+  currency          String
+  availability      Int
+  salesFrom         DateTime?
+  salesUntil        DateTime?
+  latencyMs         Int?
+
+  product           Product         @relation(fields: [productId], references: [id])
+  productId         String
+}
