@@ -126,12 +126,15 @@ const Product = {
       .catch((err) => undefined);
   },
 
-  completeOrders: async function (product: Product): Promise<void> {
+  completeOrders: async function (
+    product: Product,
+    attempts = 15
+  ): Promise<void> {
     const orders = this.getOrders(product);
 
     const updatedProduct = await new Promise<ProductWithVariants | undefined>(
       async (resolve) => {
-        for (let i = 0; i < 9; i++) {
+        for (let i = 0; i < attempts; i++) {
           if (updatedProduct !== undefined) break;
 
           console.log("Attempting to update product " + product.id);
@@ -146,7 +149,10 @@ const Product = {
             })
             .catch();
           await new Promise((resolve) =>
-            setTimeout(resolve, 100 + (i % 4 === 3 ? 200 : 0))
+            setTimeout(
+              resolve,
+              100 + (i % 4 === 3 ? 500 : 0) + (i % 10 === 9 ? 1500 : 0)
+            )
           );
         }
       }

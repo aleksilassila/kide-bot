@@ -42,7 +42,7 @@ export default class Scheduler {
       if (time.getTime() < Date.now()) {
         this.jobs[key] = scheduleJob(new Date(Date.now() + 1000), () => {
           log("Running job in 1 second");
-          Product.completeOrders(order.product);
+          Product.completeOrders(order.product, 1);
         });
       } else {
         log(
