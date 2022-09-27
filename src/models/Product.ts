@@ -37,6 +37,16 @@ const Product = {
       });
 
       product = await Product.update(product);
+      if (product === undefined) {
+        await prisma.product
+          .delete({
+            where: {
+              id: productId,
+            },
+          })
+          .catch();
+        return undefined;
+      }
     }
 
     return product;
@@ -79,7 +89,7 @@ const Product = {
                   name: <string>v.name,
                   availability: <number>v.availability,
                   price: <number>v.pricePerItem,
-                  currency: <string>v.currencyCode,
+                  currency: v.currencyCode,
                   salesFrom: v.dateSalesFrom ? new Date(v.dateSalesFrom) : null,
                   salesUntil: v.dateSalesUntil
                     ? new Date(v.dateSalesUntil)

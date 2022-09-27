@@ -70,13 +70,31 @@ const Order = {
     product: ProductWithVariants,
     order: OrderFull
   ): Promise<PrismaOrder | undefined> {
-    const variants = Array.from(product.variants).sort(
-      (a, b) =>
-        Math.abs(a.price - order.targetPrice) -
-        Math.abs(b.price - order.targetPrice)
-    );
+    const variants = Array.from(product.variants)
+      .sort(
+        (a, b) =>
+          Math.abs(a.price - order.targetPrice) -
+          Math.abs(b.price - order.targetPrice)
+      )
+      .filter((v) => v.availability !== 0);
 
-    if (variants.length === 0) return;
+    const user = await client.users
+      .fetch(order.user.discordId)
+      .catch((err) => undefined);
+
+    const informFailed = () =>
+      user?.send(`Could not reserve any tickets from ${product.name}.`).catch();
+    const informSuccess = () =>
+      user
+        ?.send(
+          `${reserveResponse?.reservationsCount} ticket(s) successfully reserved for ${product.name}!`
+        )
+        .catch();
+
+    if (variants.length === 0) {
+      await informFailed();
+      return;
+    }
 
     const reserveResponse = await reserveVariant(
       order.user,
@@ -84,31 +102,24 @@ const Order = {
       1
     );
 
-    const user = await client.users
-      .fetch(order.user.discordId)
-      .catch((err) => undefined);
     if (reserveResponse?.reservationsCount === 1) {
-      user
-        ?.send(
-          `${reserveResponse?.reservationsCount} ticket(s) successfully reserved for ${product.name}!`
-        )
-        .catch();
+      await informSuccess();
     } else {
-      user?.send(`Could not reserve any tickets from ${product.name}.`).catch();
+      await informFailed();
     }
 
-    if (reserveResponse?.reservationsCount) {
-      return await prisma.order
-        .delete({
-          where: {
-            userId_productId: {
-              userId: order.userId,
-              productId: order.productId,
-            },
+    // if (reserveResponse?.reservationsCount) {
+    return await prisma.order
+      .delete({
+        where: {
+          userId_productId: {
+            userId: order.userId,
+            productId: order.productId,
           },
-        })
-        .catch((err) => undefined);
-    }
+        },
+      })
+      .catch((err) => undefined);
+    // }
   },
 };
 

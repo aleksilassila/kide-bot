@@ -1,4 +1,4 @@
-import { fetch } from "./api";
+import { fetch, logErrors } from "./api";
 
 export interface ProductResponse {
   product?: {
@@ -34,8 +34,5 @@ export function getProduct(
     .then((res) => {
       return res.data?.model;
     })
-    .catch((err) => {
-      console.error(err);
-      return undefined;
-    });
+    .catch(logErrors);
 }

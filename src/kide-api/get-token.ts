@@ -1,4 +1,5 @@
 import axios from "axios";
+import { logErrors } from "./api";
 
 export interface TokenResponse {
   access_token: string;
@@ -21,8 +22,5 @@ export function getToken(
     .then((res) => {
       return res.data;
     })
-    .catch((err) => {
-      console.error(err);
-      return undefined;
-    });
+    .catch(logErrors);
 }

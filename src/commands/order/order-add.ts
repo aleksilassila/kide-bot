@@ -45,7 +45,7 @@ export default class OrderAdd extends Subcommand {
           product.name +
           " for target price of " +
           price +
-          "e"
+          "€"
       );
     } else {
       await this.replyEphemeral(interaction, "Could not place an order.");

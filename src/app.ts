@@ -12,6 +12,10 @@ client.once("ready", async () => {
   await Scheduler.recreateOrderJobs();
 });
 
+client.on("guildCreate", async () => {
+  await syncAllGuildsCommands(client);
+});
+
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 

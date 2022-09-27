@@ -1,7 +1,12 @@
-import { Job, scheduleJob } from "node-schedule";
+import { Job, scheduledJobs, scheduleJob } from "node-schedule";
 import Order, { OrderFull } from "./models/Order";
 import Product from "./models/Product";
 import prisma from "./prisma";
+import product from "./models/Product";
+
+function log(text: string) {
+  console.log(`[Scheduler] ${text}`);
+}
 
 export default class Scheduler {
   static jobs: { [time: string]: Job } = {};
@@ -35,14 +40,24 @@ export default class Scheduler {
       }
 
       if (time.getTime() < Date.now()) {
-        this.jobs[key] = scheduleJob(new Date(Date.now() + 1000), () =>
-          Product.completeOrders(order.product)
-        );
+        this.jobs[key] = scheduleJob(new Date(Date.now() + 1000), () => {
+          log("Running job in 1 second");
+          Product.completeOrders(order.product);
+        });
       } else {
-        this.jobs[key] = scheduleJob(time, () =>
-          Product.completeOrders(order.product)
+        log(
+          "Scheduling order for " +
+            order.product.name +
+            " at " +
+            time.toString()
         );
+        this.jobs[key] = scheduleJob(time, () => {
+          log("Running job at " + new Date().toString());
+          Product.completeOrders(order.product);
+        });
       }
     }
+
+    log(`Scheduled ${Object.keys(scheduledJobs).length} jobs`);
   }
 }

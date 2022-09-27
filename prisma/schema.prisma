@@ -52,7 +52,7 @@ model Variant {
   inventoryId       String
   name              String
   price             Int
-  currency          String
+  currency          String?
   availability      Int
   salesFrom         DateTime?
   salesUntil        DateTime?
