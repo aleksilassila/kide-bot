@@ -65,6 +65,7 @@ const Product = {
           },
           data: {
             name: <string>productInfo?.product?.name,
+            mediaFilename: productInfo?.product?.mediaFilename,
             salesFrom: productInfo?.product?.dateSalesFrom,
             salesUntil: productInfo?.product?.dateSalesUntil,
             variants: {

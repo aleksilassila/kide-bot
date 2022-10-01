@@ -41,10 +41,12 @@ model Order {
 model Product {
   id                String          @id
   name              String
-  variants          Variant[]
-  orders            Order[]
+  mediaFilename     String?
   salesFrom         DateTime?
   salesUntil        DateTime?
+
+  variants          Variant[]
+  orders            Order[]
 }
 
 model Variant {

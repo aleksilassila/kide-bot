@@ -107,7 +107,16 @@ export abstract class CommandAbstract {
     const splitId = eventId.split("/");
     const productId = splitId[splitId.length - 1];
 
-    return Product.getOrCreate(productId);
+    const product = await Product.getOrCreate(productId);
+
+    if (!product) {
+      await this.replyEphemeral(
+        interaction,
+        "Sorry, could not fetch event at this time."
+      );
+    }
+
+    return product;
   }
 
   async requireUser(

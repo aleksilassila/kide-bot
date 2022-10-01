@@ -35,9 +35,9 @@ export default class OrderList extends Subcommand {
     } else if (orders.length === 0) {
       await this.replyEphemeral(interaction, "You don't have any orders.");
     } else {
-      let response = "Your current listings:\n";
+      let response = "Your current orders:\n";
       for (const order of orders) {
-        response += `- ${order.product.name} (${order.product.id}): ${
+        response += `- **${order.product.name}** (${order.product.id}): ${
           order.targetPrice / 100
         }e\n`;
       }

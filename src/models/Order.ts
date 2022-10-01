@@ -1,10 +1,4 @@
-import {
-  Order as PrismaOrder,
-  Prisma,
-  Product,
-  User,
-  Variant,
-} from "@prisma/client";
+import { Order as PrismaOrder, Prisma, Product, User } from "@prisma/client";
 import prisma from "../prisma";
 import { ProductWithVariants } from "./Product";
 import Scheduler from "../scheduler";
@@ -27,7 +21,7 @@ const Order = {
     user: User,
     product: Product,
     targetPrice: number
-  ): Promise<PrismaOrder | undefined> {
+  ): Promise<OrderFull | undefined> {
     const order = await prisma.order
       .upsert({
         where: {
@@ -44,6 +38,14 @@ const Order = {
           userId: user.id,
           productId: product.id,
         },
+        include: {
+          user: {
+            include: {
+              token: true,
+            },
+          },
+          product: true,
+        },
       })
       .catch((err) => undefined);
 
@@ -54,17 +56,17 @@ const Order = {
   remove: async function (
     user: User,
     product: Product
-  ): Promise<number | undefined> {
-    const deleted = await prisma.order
-      .deleteMany({
+  ): Promise<PrismaOrder | undefined> {
+    return await prisma.order
+      .delete({
         where: {
-          userId: user.id,
-          productId: product.id,
+          userId_productId: {
+            userId: user.id,
+            productId: product.id,
+          },
         },
       })
       .catch((err) => undefined);
-
-    return deleted?.count;
   },
   complete: async function (
     product: ProductWithVariants,
@@ -82,44 +84,35 @@ const Order = {
       .fetch(order.user.discordId)
       .catch((err) => undefined);
 
-    const informFailed = () =>
-      user?.send(`Could not reserve any tickets from ${product.name}.`).catch();
-    const informSuccess = () =>
-      user
+    if (variants.length === 0) {
+      await user
         ?.send(
-          `${reserveResponse?.reservationsCount} ticket(s) successfully reserved for ${product.name}!`
+          `Could not reserve any tickets for **${product.name}**, no tickets left.`
         )
         .catch();
-
-    if (variants.length === 0) {
-      await informFailed();
-      return;
-    }
-
-    const reserveResponse = await reserveVariant(
-      order.user,
-      variants[0].inventoryId,
-      1
-    );
-
-    if (reserveResponse?.reservationsCount === 1) {
-      await informSuccess();
     } else {
-      await informFailed();
+      const reserveResponse = await reserveVariant(
+        order.user,
+        variants[0].inventoryId,
+        1
+      );
+
+      if (reserveResponse?.reservationsCount === 1) {
+        await user
+          ?.send(
+            `${reserveResponse?.reservationsCount} ticket(s) successfully reserved for **${product.name}**. You have 25 minutes to complete the order at https://kide.app/events/${product.id}`
+          )
+          .catch();
+      } else {
+        await user
+          ?.send(
+            `One of the following is broken: Kide.app API, this bot or my network connection. Anyways, I didn't get any tickets. You?`
+          )
+          .catch();
+      }
     }
 
-    // if (reserveResponse?.reservationsCount) {
-    return await prisma.order
-      .delete({
-        where: {
-          userId_productId: {
-            userId: order.userId,
-            productId: order.productId,
-          },
-        },
-      })
-      .catch((err) => undefined);
-    // }
+    return await this.remove(order.user, order.product);
   },
 };
 

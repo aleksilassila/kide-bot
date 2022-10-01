@@ -4,6 +4,7 @@ export interface ProductResponse {
   product?: {
     id?: string;
     name?: string;
+    mediaFilename?: string;
     dateSalesFrom?: string;
     dateSalesUntil?: string;
   };

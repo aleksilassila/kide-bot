@@ -36,7 +36,7 @@ export default class OrderRemove extends Subcommand {
     } else {
       await this.replyEphemeral(
         interaction,
-        "Removed " + removedCount + " orders from " + product.name
+        `Removed ${removedCount} orders for **${product.name}**.`
       );
     }
   }
