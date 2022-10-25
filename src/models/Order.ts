@@ -8,7 +8,6 @@ import prisma from "../prisma";
 import { ProductWithVariants } from "./Product";
 import Scheduler from "../scheduler";
 import { reserveVariant } from "../kide-api/make-reservation";
-import { client } from "../app";
 import User from "./User";
 
 export type OrderFull = Prisma.OrderGetPayload<{

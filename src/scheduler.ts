@@ -1,8 +1,6 @@
 import { Job, scheduledJobs, scheduleJob } from "node-schedule";
-import Order, { OrderFull } from "./models/Order";
 import Product from "./models/Product";
 import prisma from "./prisma";
-import product from "./models/Product";
 
 function log(text: string) {
   console.log(`[Scheduler] ${text}`);

@@ -1,9 +1,5 @@
 import { Command } from "../slash-command";
-import {
-  ChatInputCommandInteraction,
-  SlashCommandBuilder,
-  SlashCommandSubcommandsOnlyBuilder,
-} from "discord.js";
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import User from "../../models/User";
 
 export default class Login extends Command {
