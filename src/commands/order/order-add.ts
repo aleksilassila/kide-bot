@@ -2,11 +2,9 @@ import { Subcommand } from "../slash-command";
 import {
   APIEmbed,
   ChatInputCommandInteraction,
-  Embed,
   SlashCommandSubcommandBuilder,
 } from "discord.js";
 import Order, { OrderFull } from "../../models/Order";
-import { Order as PrismaOrder } from "@prisma/client";
 
 const getEmbed = (order: OrderFull): APIEmbed => ({
   title: order.product.name,
@@ -23,6 +21,15 @@ const getEmbed = (order: OrderFull): APIEmbed => ({
       value: "1",
       inline: true,
     },
+    ...(order.product.salesFrom
+      ? [
+          {
+            name: "Sales Begin",
+            value: new Date(order.product.salesFrom).toLocaleString(),
+            inline: true,
+          },
+        ]
+      : []),
   ],
   color: 0x00ff00,
   ...(order.product.mediaFilename && {

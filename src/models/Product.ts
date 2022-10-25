@@ -129,7 +129,7 @@ const Product = {
 
   completeOrders: async function (
     product: Product,
-    attempts = 15
+    attempts = 45
   ): Promise<void> {
     const orders = this.getOrders(product);
 
