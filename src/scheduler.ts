@@ -39,23 +39,18 @@ export default class Scheduler {
         continue;
       }
 
-      if (time.getTime() < Date.now()) {
-        this.jobs[key] = scheduleJob(new Date(Date.now() + 1000), () => {
-          log("Running job in 1 second");
-          Product.completeOrders(order.product, 1);
-        });
-      } else {
-        log(
-          "Scheduling order for " +
-            order.product.name +
-            " at " +
-            time.toString()
-        );
-        this.jobs[key] = scheduleJob(time, () => {
-          log("Running job at " + new Date().toString());
-          Product.completeOrders(order.product);
-        });
-      }
+      const startDate =
+        time.getTime() < Date.now() ? new Date(Date.now() + 1000) : time;
+      log(
+        "Scheduling order for " +
+          order.product.name +
+          " at " +
+          startDate.toLocaleString("fi")
+      );
+      this.jobs[key] = scheduleJob(startDate, () => {
+        log("Running job at " + new Date().toString());
+        Product.completeOrders(order.product);
+      });
     }
 
     log(`Scheduled ${Object.keys(scheduledJobs).length} jobs`);

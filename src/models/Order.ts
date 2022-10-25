@@ -1,9 +1,15 @@
-import { Order as PrismaOrder, Prisma, Product, User } from "@prisma/client";
+import {
+  Order as PrismaOrder,
+  Prisma,
+  Product,
+  User as PrismaUser,
+} from "@prisma/client";
 import prisma from "../prisma";
 import { ProductWithVariants } from "./Product";
 import Scheduler from "../scheduler";
 import { reserveVariant } from "../kide-api/make-reservation";
 import { client } from "../app";
+import User from "./User";
 
 export type OrderFull = Prisma.OrderGetPayload<{
   include: {
@@ -18,7 +24,7 @@ export type OrderFull = Prisma.OrderGetPayload<{
 
 const Order = {
   updateOrCreate: async function (
-    user: User,
+    user: PrismaUser,
     product: Product,
     targetPrice: number
   ): Promise<OrderFull | undefined> {
@@ -54,7 +60,7 @@ const Order = {
     return order;
   },
   remove: async function (
-    user: User,
+    user: PrismaUser,
     product: Product
   ): Promise<PrismaOrder | undefined> {
     return await prisma.order
@@ -80,16 +86,11 @@ const Order = {
       )
       .filter((v) => v.availability !== 0);
 
-    const user = await client.users
-      .fetch(order.user.discordId)
-      .catch((err) => undefined);
-
     if (variants.length === 0) {
-      await user
-        ?.send(
-          `Could not reserve any tickets for **${product.name}**, no tickets left.`
-        )
-        .catch();
+      await User.sendDirectMessage(
+        order.user,
+        `Could not reserve any tickets for **${product.name}**, no tickets left.`
+      );
     } else {
       const reserveResponse = await reserveVariant(
         order.user,
@@ -98,17 +99,15 @@ const Order = {
       );
 
       if (reserveResponse?.reservationsCount === 1) {
-        await user
-          ?.send(
-            `${reserveResponse?.reservationsCount} ticket(s) successfully reserved for **${product.name}**. You have 25 minutes to complete the order at https://kide.app/events/${product.id}`
-          )
-          .catch();
+        await User.sendDirectMessage(
+          order.user,
+          `${reserveResponse?.reservationsCount} ticket(s) successfully reserved for **${product.name}**. You have 25 minutes to complete the order at https://kide.app/events/${product.id}`
+        );
       } else {
-        await user
-          ?.send(
-            `One of the following is broken: Kide.app API, this bot or my network connection. Anyways, I didn't get any tickets. You?`
-          )
-          .catch();
+        await User.sendDirectMessage(
+          order.user,
+          `One of the following is broken: Kide.app API, this bot or my network connection. Anyways, I didn't get any tickets. You?`
+        );
       }
     }
 

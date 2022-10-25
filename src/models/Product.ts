@@ -1,13 +1,8 @@
-import {
-  User,
-  Variant,
-  Order as PrismaOrder,
-  Product,
-  Prisma,
-} from "@prisma/client";
+import { Prisma, Product } from "@prisma/client";
 import prisma from "../prisma";
 import { getProduct } from "../kide-api/get-product";
 import Order, { OrderFull } from "./Order";
+import User from "./User";
 
 export type ProductWithVariants = Prisma.ProductGetPayload<{
   include: {
@@ -38,6 +33,7 @@ const Product = {
 
       product = await Product.update(product);
       if (product === undefined) {
+        console.log("Removing product because of invalid id");
         await prisma.product
           .delete({
             where: {
@@ -56,6 +52,8 @@ const Product = {
     product: Product
   ): Promise<ProductWithVariants | undefined> {
     const productInfo = await getProduct(product.id);
+
+    if (productInfo === undefined) return undefined;
 
     return (
       (await prisma.product
@@ -127,12 +125,10 @@ const Product = {
       .catch((err) => undefined);
   },
 
-  completeOrders: async function (
+  updateLoop: async function (
     product: Product,
-    attempts = 45
-  ): Promise<void> {
-    const orders = this.getOrders(product);
-
+    attempts: number
+  ): Promise<ProductWithVariants | undefined> {
     const updatedProduct = await new Promise<ProductWithVariants | undefined>(
       async (resolve) => {
         for (let i = 0; i < attempts; i++) {
@@ -140,13 +136,24 @@ const Product = {
 
           console.log("Attempting to update product " + product.id);
           this.update(product)
-            .then((p) => {
-              if (p && p.variants.length > 0) {
+            .then(async (p) => {
+              if (p?.salesUntil && p?.salesUntil.getTime() < Date.now()) {
+                resolve(undefined);
+                console.log(
+                  `Removing product ${product.id} because of expired sales`
+                );
+                await prisma.product.delete({
+                  where: {
+                    id: product.id,
+                  },
+                });
+              } else if (p && p.variants.length > 0) {
                 console.log("Product " + product.id + " updated");
                 resolve(p);
-              } else if (i === 8) {
-                resolve(undefined);
               }
+              // else if (i === 8) {
+              //   resolve(undefined);
+              // }
             })
             .catch();
           await new Promise((resolve) =>
@@ -159,10 +166,29 @@ const Product = {
       }
     );
 
+    return updatedProduct;
+  },
+
+  completeOrders: async function (product: Product): Promise<void> {
+    const orders = this.getOrders(product);
+
+    const updatedProduct = await this.updateLoop(
+      product,
+      (product.salesFrom || new Date()).getTime() < Date.now() ? 1 : 30
+    );
+
     if (updatedProduct === undefined) {
       console.error(
         `Could not update product ${product.id} and therefore complete orders.`
       );
+
+      for (const order of (await orders) || []) {
+        await User.sendDirectMessage(
+          order.user,
+          "Could not reserve any tickets for **${product.name}**, could fetch tickets. Have the ticket sales ended?"
+        );
+      }
+
       return;
     }
 

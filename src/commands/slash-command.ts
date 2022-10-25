@@ -12,6 +12,7 @@ import {
 import Product from "../models/Product";
 import { Product as PrismaProduct, User as PrismaUser } from "@prisma/client";
 import prisma from "../prisma";
+import { getProduct } from "../kide-api/get-product";
 
 export abstract class CommandAbstract {
   abstract getName(): string;
@@ -112,7 +113,7 @@ export abstract class CommandAbstract {
     if (!product) {
       await this.replyEphemeral(
         interaction,
-        "Sorry, could not fetch event at this time."
+        "Sorry, could not fetch event at this time. Invalid event id?"
       );
     }
 

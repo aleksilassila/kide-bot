@@ -2,6 +2,7 @@ import { Prisma, Token, User } from "@prisma/client";
 import { getToken } from "../kide-api/get-token";
 import { getUser } from "../kide-api/get-user";
 import prisma from "../prisma";
+import { client } from "../app";
 
 export type UserWithToken = Prisma.UserGetPayload<{
   include: {
@@ -77,6 +78,13 @@ const User = {
         },
       })
       .catch((err) => undefined);
+  },
+  sendDirectMessage: async function (user: User, message: string) {
+    const dcUser = await client.users
+      .fetch(user.discordId)
+      .catch((err) => undefined);
+
+    dcUser?.send(message).catch(console.error);
   },
 };
 

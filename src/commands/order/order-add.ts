@@ -25,7 +25,7 @@ const getEmbed = (order: OrderFull): APIEmbed => ({
       ? [
           {
             name: "Sales Begin",
-            value: new Date(order.product.salesFrom).toLocaleString(),
+            value: new Date(order.product.salesFrom).toLocaleString("fi-Fi"),
             inline: true,
           },
         ]

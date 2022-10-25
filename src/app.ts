@@ -3,7 +3,6 @@ import { DISCORD_TOKEN } from "./config";
 import { execute } from "./commands";
 import { syncAllGuildsCommands } from "./deploy-commands";
 import Scheduler from "./scheduler";
-import { scheduleJob } from "node-schedule";
 
 export const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
