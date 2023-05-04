@@ -1,4 +1,3 @@
-import { CommandWithSubcommands, Subcommand } from "../slash-command";
 import {
   SlashCommandBuilder,
   SlashCommandSubcommandsOnlyBuilder,
@@ -6,6 +5,8 @@ import {
 import OrderAdd from "./order-add";
 import OrderList from "./order-list";
 import OrderRemove from "./order-remove";
+import { CommandWithSubcommands } from "../command";
+import { Subcommand } from "../subcommand";
 
 export default class Order extends CommandWithSubcommands {
   async buildCommandWithSubcommands(

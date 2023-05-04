@@ -1,6 +1,6 @@
 import { Prisma, Token, User } from "@prisma/client";
 import { getToken } from "../kide-api/get-token";
-import { getUser } from "../kide-api/get-user";
+import { getKideUser } from "../kide-api/get-kide-user";
 import prisma from "../prisma";
 import { client } from "../app";
 
@@ -22,9 +22,9 @@ const User = {
       return;
     }
 
-    const userResponse = await getUser(tokenResponse.access_token);
+    const kideUser = await getKideUser(tokenResponse.access_token);
 
-    if (!userResponse) return;
+    if (!kideUser) return;
 
     return await prisma.user
       .upsert({
@@ -33,9 +33,9 @@ const User = {
         },
         update: {
           discordId: discordUserId,
-          id: userResponse.id,
-          email: userResponse.email,
-          fullName: userResponse.fullName,
+          id: kideUser.id,
+          email: kideUser.email,
+          fullName: kideUser.fullName,
           password: password,
           token: {
             update: {
@@ -46,9 +46,9 @@ const User = {
         },
         create: {
           discordId: discordUserId,
-          id: userResponse.id,
-          email: userResponse.email,
-          fullName: userResponse.fullName,
+          id: kideUser.id,
+          email: kideUser.email,
+          fullName: kideUser.fullName,
           password: password,
           token: {
             create: {
@@ -87,6 +87,16 @@ const User = {
       .catch((err) => undefined);
 
     dcUser?.send(message).catch(console.error);
+  },
+
+  destroy: async function (user: User) {
+    return await prisma.user
+      .delete({
+        where: {
+          id: user.id,
+        },
+      })
+      .catch(console.error);
   },
 };
 

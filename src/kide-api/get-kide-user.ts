@@ -1,12 +1,14 @@
 import axios from "axios";
 
-export interface UserResponse {
+export interface KideUserResponse {
   id: string;
   fullName: string;
   email: string;
 }
 
-export function getUser(token: string): Promise<UserResponse | undefined> {
+export function getKideUser(
+  token: string
+): Promise<KideUserResponse | undefined> {
   return axios({
     url: "https://api.kide.app/api/authentication/user",
     headers: {

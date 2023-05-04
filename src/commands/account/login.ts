@@ -1,6 +1,6 @@
-import { Command } from "../slash-command";
 import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import User from "../../models/User";
+import { Command } from "../command";
 
 export default class Login extends Command {
   async buildCommand(): Promise<SlashCommandBuilder | any> {
@@ -21,7 +21,7 @@ export default class Login extends Command {
       );
   }
 
-  protected async execute(
+  protected async onInteraction(
     interaction: ChatInputCommandInteraction
   ): Promise<void> {
     const username = interaction.options.getString("username", true);
@@ -34,16 +34,18 @@ export default class Login extends Command {
     );
 
     if (!user) {
-      await this.replyEphemeral(
+      await this.reply(
         interaction,
-        "Could not log in. Invalid credentials?"
+        "Could not log in. Invalid credentials?",
+        true
       );
       return;
     }
 
-    await this.replyEphemeral(
+    await this.reply(
       interaction,
-      `Successfully logged in as ${user.fullName}.`
+      `Successfully logged in as ${user.fullName}.`,
+      true
     );
   }
 

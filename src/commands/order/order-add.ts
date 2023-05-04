@@ -1,10 +1,10 @@
-import { Subcommand } from "../slash-command";
 import {
   APIEmbed,
   ChatInputCommandInteraction,
   SlashCommandSubcommandBuilder,
 } from "discord.js";
 import Order, { OrderFull } from "../../models/Order";
+import { Subcommand } from "../subcommand";
 
 const getEmbed = (order: OrderFull): APIEmbed => ({
   title: order.product.name,
@@ -61,7 +61,7 @@ export default class OrderAdd extends Subcommand {
       );
   }
 
-  protected async execute(
+  protected async onInteraction(
     interaction: ChatInputCommandInteraction
   ): Promise<void> {
     const product = await this.requireProduct(interaction);
@@ -73,11 +73,16 @@ export default class OrderAdd extends Subcommand {
     const order = await Order.updateOrCreate(user, product, price);
 
     if (order) {
-      await this.reply(interaction, {
-        embeds: [getEmbed(order)],
-      });
+      await interaction
+        .editReply({
+          embeds: [getEmbed(order)],
+          options: {
+            ephemeral: this.shouldReplyEphemeral(),
+          },
+        })
+        .catch(console.error);
     } else {
-      await this.replyEphemeral(interaction, "Could not place an order.");
+      await this.reply(interaction, "Could not place an order.", true);
     }
   }
 

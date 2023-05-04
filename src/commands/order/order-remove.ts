@@ -1,9 +1,9 @@
-import { Subcommand } from "../slash-command";
 import {
   ChatInputCommandInteraction,
   SlashCommandSubcommandBuilder,
 } from "discord.js";
 import Order from "../../models/Order";
+import { Subcommand } from "../subcommand";
 
 export default class OrderRemove extends Subcommand {
   buildSubcommand(
@@ -21,7 +21,7 @@ export default class OrderRemove extends Subcommand {
       );
   }
 
-  protected async execute(
+  protected async onInteraction(
     interaction: ChatInputCommandInteraction
   ): Promise<void> {
     const user = await this.requireUser(interaction);
@@ -32,11 +32,12 @@ export default class OrderRemove extends Subcommand {
     const removedCount = await Order.remove(user, product);
 
     if (removedCount === undefined) {
-      await this.replyEphemeral(interaction, "Could not remove orders.");
+      await this.reply(interaction, "Could not remove orders.", true);
     } else {
-      await this.replyEphemeral(
+      await this.reply(
         interaction,
-        `Removed ${removedCount} orders for **${product.name}**.`
+        `Removed ${removedCount} orders for **${product.name}**.`,
+        true
       );
     }
   }

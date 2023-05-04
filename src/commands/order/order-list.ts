@@ -1,9 +1,9 @@
-import { Subcommand } from "../slash-command";
 import {
   ChatInputCommandInteraction,
   SlashCommandSubcommandBuilder,
 } from "discord.js";
 import prisma from "../../prisma";
+import { Subcommand } from "../subcommand";
 
 export default class OrderList extends Subcommand {
   buildSubcommand(
@@ -12,7 +12,7 @@ export default class OrderList extends Subcommand {
     return builderWithName.setDescription("List all orders");
   }
 
-  protected async execute(
+  protected async onInteraction(
     interaction: ChatInputCommandInteraction
   ): Promise<void> {
     const user = await this.requireUser(interaction);
@@ -31,9 +31,9 @@ export default class OrderList extends Subcommand {
       .catch((err) => undefined);
 
     if (orders === undefined) {
-      await this.replyEphemeral(interaction, "Could not list orders.");
+      await this.reply(interaction, "Could not list orders.", true);
     } else if (orders.length === 0) {
-      await this.replyEphemeral(interaction, "You don't have any orders.");
+      await this.reply(interaction, "You don't have any orders.", true);
     } else {
       let response = "Your current orders:\n";
       for (const order of orders) {
@@ -42,7 +42,7 @@ export default class OrderList extends Subcommand {
         }e\n`;
       }
 
-      await this.replyEphemeral(interaction, response);
+      await this.reply(interaction, response, true);
     }
   }
 
