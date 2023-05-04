@@ -17,7 +17,7 @@ services:
 
   node:
     container_name: kide-bot-dev-node
-#    image: 896896/see-skin:backend
+    image: 896896/kide-bot:latest
     build:
       dockerfile: Dockerfile.dev
     environment:
