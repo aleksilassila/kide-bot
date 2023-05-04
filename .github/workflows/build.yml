@@ -1,15 +1,15 @@
-name: Tests
+name: Build
 
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   push:
     timeout-minutes: 10
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
 
     steps:
       - name: Checkout
