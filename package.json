@@ -4,7 +4,8 @@
   "main": "src/app.ts",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon src/app.ts"
+    "start": "ts-node src/app.ts",
+    "dev": "nodemon src/app.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

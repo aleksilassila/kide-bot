@@ -1,0 +1,17 @@
+version: "3.7"
+name: kide-bot-prod
+
+services:
+#  db:
+#    container_name: see-skin-prod-db
+#    environment:
+#      POSTGRES_USER: post
+#      POSTGRES_DB: post
+#      POSTGRES_PASSWORD: post
+
+  node:
+    container_name: kide-bot-prod-node
+    build:
+      dockerfile: Dockerfile.prod
+    environment:
+      NODE_ENV: production

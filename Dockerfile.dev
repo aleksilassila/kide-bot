@@ -1,0 +1,21 @@
+FROM node:18
+
+# Create app directory
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
+COPY package.json /usr/src/app
+COPY *.lock /usr/src/app
+
+RUN yarn install
+# If you are building your code for production
+# RUN npm ci --omit=dev
+
+COPY ./prisma/schema.prisma /usr/src/app/prisma/schema.prisma
+
+RUN npx prisma generate
+
+CMD [ "npm", "run", "dev" ]
