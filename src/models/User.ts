@@ -60,6 +60,7 @@ const User = {
       })
       .catch((err) => undefined);
   },
+
   refreshToken: async function (user: User): Promise<Token | undefined> {
     const tokenResponse = await getToken(user.email, user.password);
 
@@ -79,6 +80,7 @@ const User = {
       })
       .catch((err) => undefined);
   },
+
   sendDirectMessage: async function (user: User, message: string) {
     const dcUser = await client.users
       .fetch(user.discordId)

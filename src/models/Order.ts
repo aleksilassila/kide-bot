@@ -6,9 +6,9 @@ import {
 } from "@prisma/client";
 import prisma from "../prisma";
 import { ProductWithVariants } from "./Product";
-import Scheduler from "../scheduler";
 import { reserveVariant } from "../kide-api/make-reservation";
 import User from "./User";
+import ReservationEvent from "../commands/events/reservation-event";
 
 export type OrderFull = Prisma.OrderGetPayload<{
   include: {
@@ -54,7 +54,7 @@ const Order = {
       })
       .catch((err) => undefined);
 
-    await Scheduler.recreateOrderJobs();
+    await ReservationEvent.updateEvents();
 
     return order;
   },
@@ -62,7 +62,7 @@ const Order = {
     user: PrismaUser,
     product: Product
   ): Promise<PrismaOrder | undefined> {
-    return await prisma.order
+    const deleted = await prisma.order
       .delete({
         where: {
           userId_productId: {
@@ -72,6 +72,12 @@ const Order = {
         },
       })
       .catch((err) => undefined);
+
+    if (deleted !== undefined) {
+      await ReservationEvent.updateEvents();
+    }
+
+    return deleted;
   },
   complete: async function (
     product: ProductWithVariants,

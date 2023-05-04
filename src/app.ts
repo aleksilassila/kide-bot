@@ -2,13 +2,14 @@ import { Client, GatewayIntentBits } from "discord.js";
 import { DISCORD_TOKEN } from "./config";
 import { execute } from "./commands";
 import { syncAllGuildsCommands } from "./deploy-commands";
-import Scheduler from "./scheduler";
+import prisma from "./prisma";
+import ReservationEvent from "./commands/events/reservation-event";
 
 export const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.once("ready", async () => {
   await syncAllGuildsCommands(client);
-  await Scheduler.recreateOrderJobs();
+  await ReservationEvent.updateEvents();
 });
 
 client.on("guildCreate", async () => {
