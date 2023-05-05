@@ -5,19 +5,15 @@ import {
 import prisma from "../../prisma";
 import { Subcommand } from "../subcommand";
 
-export default class OrderList extends Subcommand {
+class OrderList extends Subcommand {
   buildSubcommand(
     builderWithName: SlashCommandSubcommandBuilder
   ): SlashCommandSubcommandBuilder {
-    return builderWithName.setDescription("List all orders");
+    return super.buildSubcommand(builderWithName);
   }
 
-  protected async onInteraction(
-    interaction: ChatInputCommandInteraction
-  ): Promise<void> {
+  async onInteraction(interaction: ChatInputCommandInteraction): Promise<void> {
     const user = await this.requireUser(interaction);
-
-    if (!user) return;
 
     const orders = await prisma.order
       .findMany({
@@ -45,8 +41,6 @@ export default class OrderList extends Subcommand {
       await this.reply(interaction, response, true);
     }
   }
-
-  getName(): string {
-    return "list";
-  }
 }
+
+export default new OrderList("list", "List all orders");

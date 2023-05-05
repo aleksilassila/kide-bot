@@ -1,16 +1,12 @@
 import { Client, REST, Routes } from "discord.js";
 import { DISCORD_CLIENT_ID, DISCORD_TOKEN } from "./config";
-import { getCommands } from "./commands";
+import { commands } from "./commands";
 
 const rest = new REST({ version: "10" }).setToken(DISCORD_TOKEN);
 
 export const syncGuildCommands = async (guildId: string) => {
-  const commands = getCommands();
-
   const commandsJSON = await Promise.all(
-    commands.map((command) =>
-      command.buildCommand().then((builder) => builder.toJSON())
-    )
+    commands.map((command) => command.buildCommand().toJSON())
   );
 
   rest

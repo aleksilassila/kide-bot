@@ -1,25 +1,13 @@
-import {
-  SlashCommandBuilder,
-  SlashCommandSubcommandsOnlyBuilder,
-} from "discord.js";
-import OrderAdd from "./order-add";
-import OrderList from "./order-list";
-import OrderRemove from "./order-remove";
+import orderAdd from "./order-add";
+import orderList from "./order-list";
+import orderRemove from "./order-remove";
 import { CommandWithSubcommands } from "../command";
 import { Subcommand } from "../subcommand";
 
-export default class Order extends CommandWithSubcommands {
-  async buildCommandWithSubcommands(
-    builderWithName: SlashCommandBuilder
-  ): Promise<SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder> {
-    return builderWithName.setDescription("Place an order on an item");
-  }
-
-  getName(): string {
-    return "order";
-  }
-
+class Order extends CommandWithSubcommands {
   getSubcommands(): Subcommand[] {
-    return [new OrderAdd(), new OrderRemove(), new OrderList()];
+    return [orderAdd, orderRemove, orderList];
   }
 }
+
+export default new Order("order", "Manage your orders.");

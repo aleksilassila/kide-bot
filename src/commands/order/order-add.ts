@@ -39,12 +39,12 @@ const getEmbed = (order: OrderFull): APIEmbed => ({
   }),
 });
 
-export default class OrderAdd extends Subcommand {
+class OrderAdd extends Subcommand {
   buildSubcommand(
-    builderWithName: SlashCommandSubcommandBuilder
+    subcommandBuilder: SlashCommandSubcommandBuilder
   ): SlashCommandSubcommandBuilder {
-    return builderWithName
-      .setDescription("Add an order for an item")
+    return super
+      .buildSubcommand(subcommandBuilder)
       .addStringOption((option) =>
         option
           .setName("event-id")
@@ -61,14 +61,10 @@ export default class OrderAdd extends Subcommand {
       );
   }
 
-  protected async onInteraction(
-    interaction: ChatInputCommandInteraction
-  ): Promise<void> {
+  async onInteraction(interaction: ChatInputCommandInteraction): Promise<void> {
     const product = await this.requireProduct(interaction);
     const user = await this.requireUser(interaction);
     const price = interaction.options.getNumber("target-price", true);
-
-    if (!user || !product) return;
 
     const order = await Order.updateOrCreate(user, product, price);
 
@@ -85,12 +81,6 @@ export default class OrderAdd extends Subcommand {
       await this.reply(interaction, "Could not place an order.", true);
     }
   }
-
-  shouldDelayResponses(): boolean {
-    return true;
-  }
-
-  getName(): string {
-    return "add";
-  }
 }
+
+export default new OrderAdd("add", "Place an order for an item.");

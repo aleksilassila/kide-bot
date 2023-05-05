@@ -1,7 +1,6 @@
 import {
   ChatInputCommandInteraction,
   Guild,
-  InteractionReplyOptions,
   InteractionResponse,
   Message,
   TextChannel,
@@ -9,36 +8,35 @@ import {
 import Product from "../models/Product";
 import { Product as PrismaProduct, User as PrismaUser } from "@prisma/client";
 import prisma from "../prisma";
+import ValidationError from "./validation-error";
 
 export abstract class AbstractCommand {
-  abstract getName(): string;
-  async executeCommand(
-    interaction: ChatInputCommandInteraction
-  ): Promise<void> {
-    if (this.shouldDelayResponses()) {
-      await interaction.deferReply({ ephemeral: this.shouldReplyEphemeral() });
-    }
+  name: string;
+  description: string;
 
-    return await this.onInteraction(interaction);
+  constructor(name: string, description: string = "") {
+    this.name = name;
+    this.description = description;
   }
 
-  protected abstract onInteraction(
+  abstract onInteraction(
     interaction: ChatInputCommandInteraction
   ): Promise<void>;
 
-  shouldDelayResponses() {
+  shouldDelayResponses(interaction: ChatInputCommandInteraction) {
     return true;
   }
 
   shouldReplyEphemeral() {
     return false;
   }
+
   async reply(
     interaction: ChatInputCommandInteraction,
     content: string,
     ephemeral: boolean = false
   ): Promise<void | Message | InteractionResponse> {
-    if (this.shouldDelayResponses()) {
+    if (this.shouldDelayResponses(interaction)) {
       return interaction
         .editReply({ content, options: { ephemeral } })
         .catch(console.error);
@@ -47,42 +45,32 @@ export abstract class AbstractCommand {
     }
   }
 
-  async requireGuild(
-    interaction: ChatInputCommandInteraction
-  ): Promise<Guild | null> {
+  async requireGuild(interaction: ChatInputCommandInteraction): Promise<Guild> {
     const guild = interaction.guild;
     if (!guild)
-      await this.reply(
-        interaction,
-        "This command can only be used in a server.",
-        true
-      );
+      throw new ValidationError("This command can only be used in a server.");
     return guild;
   }
 
   async requireGuildTextChannel(
     interaction: ChatInputCommandInteraction
-  ): Promise<TextChannel | undefined> {
+  ): Promise<TextChannel> {
     const channel = interaction.channel;
     if (!channel) {
-      await this.reply(
-        interaction,
-        "This command can only be used in server's text channel.",
-        true
+      throw new ValidationError(
+        "This command can only be used in server's text channel."
       );
-      return;
     }
-    return <TextChannel>channel;
+    return channel as TextChannel;
   }
 
   async requireProduct(
     interaction: ChatInputCommandInteraction
-  ): Promise<PrismaProduct | undefined> {
+  ): Promise<PrismaProduct> {
     const eventId = interaction.options.getString("event-id");
 
     if (!eventId) {
-      await this.reply(interaction, "This command requires event id.", true);
-      return;
+      throw new ValidationError("This command requires event id.");
     }
 
     const splitId = eventId.split("/");
@@ -91,10 +79,8 @@ export abstract class AbstractCommand {
     const product = await Product.getOrCreate(productId);
 
     if (!product) {
-      await this.reply(
-        interaction,
-        "Sorry, could not fetch event at this time. Invalid event id?",
-        true
+      throw new ValidationError(
+        "Sorry, could not fetch event at this time. Invalid event id?"
       );
     }
 
@@ -103,7 +89,7 @@ export abstract class AbstractCommand {
 
   async requireUser(
     interaction: ChatInputCommandInteraction
-  ): Promise<PrismaUser | undefined> {
+  ): Promise<PrismaUser> {
     const user = await prisma.user
       .findUnique({
         where: {
@@ -113,12 +99,9 @@ export abstract class AbstractCommand {
       .catch((err) => undefined);
 
     if (!user) {
-      await this.reply(
-        interaction,
-        "It seems like you haven't logged in with Kide yet. Try /login first.",
-        true
+      throw new ValidationError(
+        "It seems like you haven't logged in with Kide yet. Try /login first."
       );
-      return;
     }
 
     return user;

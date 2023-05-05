@@ -5,12 +5,12 @@ import {
 import Order from "../../models/Order";
 import { Subcommand } from "../subcommand";
 
-export default class OrderRemove extends Subcommand {
+class OrderRemove extends Subcommand {
   buildSubcommand(
     builderWithName: SlashCommandSubcommandBuilder
   ): SlashCommandSubcommandBuilder {
-    return builderWithName
-      .setDescription("Remove all orders based on Kide event id.")
+    return super
+      .buildSubcommand(builderWithName)
       .addStringOption((option) =>
         option
           .setName("event-id")
@@ -21,13 +21,9 @@ export default class OrderRemove extends Subcommand {
       );
   }
 
-  protected async onInteraction(
-    interaction: ChatInputCommandInteraction
-  ): Promise<void> {
+  async onInteraction(interaction: ChatInputCommandInteraction): Promise<void> {
     const user = await this.requireUser(interaction);
     const product = await this.requireProduct(interaction);
-
-    if (!user || !product) return;
 
     const removedCount = await Order.remove(user, product);
 
@@ -41,8 +37,9 @@ export default class OrderRemove extends Subcommand {
       );
     }
   }
-
-  getName(): string {
-    return "remove";
-  }
 }
+
+export default new OrderRemove(
+  "remove",
+  "Remove all orders based on Kide event id."
+);

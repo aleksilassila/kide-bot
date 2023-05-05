@@ -2,11 +2,10 @@ import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import User from "../../models/User";
 import { Command } from "../command";
 
-export default class Login extends Command {
-  async buildCommand(): Promise<SlashCommandBuilder | any> {
-    return new SlashCommandBuilder()
-      .setName(this.getName())
-      .setDescription("Use this command to log in with your Kide account.")
+class Login extends Command {
+  buildCommand() {
+    return super
+      .buildCommand()
       .addStringOption((option) =>
         option
           .setName("username")
@@ -18,12 +17,10 @@ export default class Login extends Command {
           .setName("password")
           .setDescription("Your Kide password.")
           .setRequired(true)
-      );
+      ) as SlashCommandBuilder;
   }
 
-  protected async onInteraction(
-    interaction: ChatInputCommandInteraction
-  ): Promise<void> {
+  async onInteraction(interaction: ChatInputCommandInteraction): Promise<void> {
     const username = interaction.options.getString("username", true);
     const password = interaction.options.getString("password", true);
 
@@ -49,11 +46,12 @@ export default class Login extends Command {
     );
   }
 
-  shouldDelayResponses(): boolean {
+  shouldDelayResponses(interaction: ChatInputCommandInteraction) {
     return true;
   }
-
-  getName(): string {
-    return "login";
-  }
 }
+
+export default new Login(
+  "login",
+  "Use this command to log in with your Kide account."
+);
