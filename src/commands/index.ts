@@ -19,7 +19,7 @@ export async function execute(interaction: CommandInteraction) {
   for (const command of commands) {
     if (command.name === commandName) {
       if (command.shouldDelayResponses(interaction)) {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true }).catch(console.error);
       }
 
       try {

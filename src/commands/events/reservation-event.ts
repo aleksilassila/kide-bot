@@ -85,43 +85,45 @@ export default class ReservationEvent {
     product: PrismaProduct,
     attempts: number
   ): Promise<ProductWithVariants | undefined> {
-    const updatedProduct = await new Promise<ProductWithVariants | undefined>(
-      async (resolve) => {
-        for (let i = 0; i < attempts; i++) {
-          if (updatedProduct !== undefined) break;
+    const createPromise = async (i: number) => {
+      await new Promise((resolve) =>
+        setTimeout(
+          resolve,
+          i * 100 + (i % 4 === 3 ? 500 : 0) + (i % 10 === 9 ? 1500 : 0)
+        )
+      );
 
-          console.log("Attempting to update product " + product.id);
-          Product.update(product)
-            .then(async (p) => {
-              if (p?.salesUntil && p?.salesUntil.getTime() < Date.now()) {
-                resolve(undefined);
-                console.log(
-                  `Removing product ${product.id} because of expired sales`
-                );
-                await prisma.product.delete({
-                  where: {
-                    id: product.id,
-                  },
-                });
-              } else if (p && p.variants.length > 0) {
-                console.log("Product " + product.id + " updated");
-                resolve(p);
-              }
-              // else if (i === 8) {
-              //   resolve(undefined);
-              // }
-            })
-            .catch();
-          await new Promise((resolve) =>
-            setTimeout(
-              resolve,
-              100 + (i % 4 === 3 ? 500 : 0) + (i % 10 === 9 ? 1500 : 0)
-            )
-          );
-        }
-      }
-    );
+      console.log("Attempting to update product " + product.id);
 
-    return updatedProduct;
+      return Product.update(product)
+        .then(async (p) => {
+          if (p?.salesUntil && p?.salesUntil.getTime() < Date.now()) {
+            console.log(
+              `Removing product ${product.id} because of expired sales`
+            );
+
+            await prisma.product.delete({
+              where: {
+                id: product.id,
+              },
+            });
+            return undefined;
+          } else if (p && p.variants.length > 0) {
+            console.log("Product " + product.id + " updated");
+            return p;
+          }
+          // else if (i === 8) {
+          //   resolve(undefined);
+          // }
+        })
+        .catch(console.error);
+    };
+
+    const promises = [];
+    for (let i = 0; i < attempts; i++) {
+      promises.push(createPromise(i));
+    }
+
+    return Promise.race(promises).then((p) => p || undefined);
   }
 }
