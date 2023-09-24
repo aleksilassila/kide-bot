@@ -13,7 +13,7 @@ COPY ./prisma ./prisma
 
 RUN npx prisma generate
 
-FROM --platform=linux/amd64 node:18-alpine as production
+FROM --platform=linux/amd64 node:18 as production
 
 WORKDIR /usr/src/app
 
