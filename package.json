@@ -4,7 +4,7 @@
   "main": "src/app.ts",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node src/app.ts",
+    "start": "prisma migrate deploy && ts-node src/app.ts",
     "dev": "nodemon src/app.ts"
   },
   "prisma": {

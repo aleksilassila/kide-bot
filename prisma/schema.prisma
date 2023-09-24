@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -11,55 +12,55 @@ datasource db {
 }
 
 model Token {
-  token             String          @id
-  expiresAt         DateTime
-  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            String          @unique
+  token     String   @id
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @unique
 }
 
 model User {
-  id                String          @id @unique
-  discordId         String          @unique
-  fullName          String
-  email             String
-  password          String
+  id        String @id @unique
+  discordId String @unique
+  fullName  String
+  email     String
+  password  String
 
-  token             Token?
-  orders            Order[]
+  token  Token?
+  orders Order[]
 }
 
 model Order {
-  targetPrice       Int
-  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            String
-  product           Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId         String
+  targetPrice Int
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId   String
 
   @@id([userId, productId])
 }
 
 model Product {
-  id                String          @id
-  name              String
-  mediaFilename     String?
-  salesFrom         DateTime?
-  salesUntil        DateTime?
+  id            String    @id
+  name          String
+  mediaFilename String?
+  salesFrom     DateTime?
+  salesUntil    DateTime?
 
-  variants          Variant[]
-  orders            Order[]
+  variants Variant[]
+  orders   Order[]
 }
 
 model Variant {
-  id                String          @id
-  inventoryId       String
-  name              String
-  price             Int
-  currency          String?
-  availability      Int
-  salesFrom         DateTime?
-  salesUntil        DateTime?
-  latencyMs         Int?
+  id           String    @id
+  inventoryId  String
+  name         String
+  price        Int
+  currency     String?
+  availability Int
+  salesFrom    DateTime?
+  salesUntil   DateTime?
+  latencyMs    Int?
 
-  product           Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId         String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
 }

@@ -2,32 +2,14 @@ version: "3.7"
 name: kide-bot-dev
 
 services:
-#  db:
-#    image: postgres:14
-#    container_name: see-skin-dev-db
-#    environment:
-#      POSTGRES_USER: post
-#      POSTGRES_DB: post
-#      POSTGRES_PASSWORD: post
-#    ports:
-#      - 5432:5432
-#    volumes:
-#      - dbdata:/var/lib/postgresql/data
-#    restart: unless-stopped
-
   node:
     container_name: kide-bot-dev-node
-    image: 896896/kide-bot:latest
+    image: ghcr.io/aleksilassila/kide-bot:latest
     build:
-      dockerfile: Dockerfile.dev
+      target: development
     environment:
       DISCORD_TOKEN: ${DISCORD_TOKEN}
       NODE_ENV: development
-#    depends_on:
-#      - db
     volumes:
       - ./prisma:/usr/src/app/prisma
     restart: unless-stopped
-
-#volumes:
-#  dbdata:

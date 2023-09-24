@@ -45,10 +45,6 @@ class Login extends Command {
       true
     );
   }
-
-  shouldDelayResponses(interaction: ChatInputCommandInteraction) {
-    return true;
-  }
 }
 
 export default new Login(
